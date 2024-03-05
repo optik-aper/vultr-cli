@@ -784,6 +784,29 @@ func NewCmdDatabase(base *cli.Base) *cobra.Command { //nolint:funlen,gocyclo
 		},
 	}
 
+	// Logical DB Get
+	dbGet := &cobra.Command{
+		Use:   "get <Database ID> <DB Name>",
+		Short: "Get a logical databases",
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) != 2 {
+				return errors.New("please provide a database ID and the logical db name")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			db, err := o.getDB()
+			if err != nil {
+				return fmt.Errorf("error retrieving a logical database: %v", err)
+			}
+
+			data := &LogicalDBPrinter{DB: db}
+			o.Base.Printer.Display(data, nil)
+
+			return nil
+		},
+	}
+
 	// Logical DB Create
 	dbCreate := &cobra.Command{
 		Use:   "create <Database ID>",
@@ -845,6 +868,7 @@ func NewCmdDatabase(base *cli.Base) *cobra.Command { //nolint:funlen,gocyclo
 
 	db.AddCommand(
 		dbList,
+		dbGet,
 		dbCreate,
 		dbDel,
 	)
@@ -2498,6 +2522,11 @@ func (o *options) updateUserACL() (*govultr.DatabaseUser, error) {
 func (o *options) listDBs() ([]govultr.DatabaseDB, *govultr.Meta, error) {
 	dbs, meta, _, err := o.Base.Client.Database.ListDBs(o.Base.Context, o.Base.Args[0])
 	return dbs, meta, err
+}
+
+func (o *options) getDB() (*govultr.DatabaseDB, error) {
+	db, _, err := o.Base.Client.Database.GetDB(o.Base.Context, o.Base.Args[0], o.Base.Args[1])
+	return db, err
 }
 
 func (o *options) createDB() (*govultr.DatabaseDB, error) {
