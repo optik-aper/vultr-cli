@@ -2,7 +2,6 @@ package cli
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -55,7 +54,6 @@ func (b *Base) HasAuth() bool {
 
 	token = viper.GetString("api-key")
 
-	fmt.Printf("%v", token)
 	if token == "" {
 		return false
 	}
