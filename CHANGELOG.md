@@ -1,9 +1,11 @@
 # Change Log
 ## [3.11.0](https://github.com/vultr/vultr-cli/compare/v3.10.0...v3.11.0) (2026-08-07)
+### Enhancements
+* Inference: Redesign usage printer to show chat usage by model [PR 594](https://github.com/vultr/vultr-cli/pull/594)
+
 ### Bug Fixes
 * Fix handling of empty config file [PR 595](https://github.com/vultr/vultr-cli/pull/595)
 * Send CLI diagnostics to stderr instead of stdout [PR 599](https://github.com/vultr/vultr-cli/pull/599)
-* Redesign inference usage printer to show chat usage by model [PR 594](https://github.com/vultr/vultr-cli/pull/594)
  
 ### Clean Up
 * Remove deprecated VPC2 commands [PR 600](https://github.com/vultr/vultr-cli/pull/600)
