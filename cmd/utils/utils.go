@@ -39,8 +39,9 @@ func FormatFirewallNetwork(subnet string, size int) string {
 	return fmt.Sprintf("%s/%d", subnet, size)
 }
 
-func IsCIDRFormatted(addr string) (bool, error) {
-	match, err := regexp.MatchString(CIDRRegex, addr)
+// IsCIDRFormatted checks the argument against a CIDR regex
+func IsCIDRFormatted(cidr string) (bool, error) {
+	match, err := regexp.MatchString(CIDRRegex, cidr)
 	if err != nil {
 		return false, err
 	}
@@ -48,6 +49,7 @@ func IsCIDRFormatted(addr string) (bool, error) {
 	return match, nil
 }
 
+// SplitCIDRFormat splits CIDR formatted strings into address and mask
 func SplitCIDRFormat(cidr string) (address *string, mask *int, err error) {
 	if ok, err := IsCIDRFormatted(cidr); !ok {
 		return nil, nil, fmt.Errorf("%q is not an understandable cidr format : %v", cidr, err)
