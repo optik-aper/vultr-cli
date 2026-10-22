@@ -15,44 +15,89 @@ import (
 )
 
 var (
-	long    = ``
-	example = ``
+	long    = `Access commands related to VPNs`
+	example = `
+	# Full example
+	vultr-cli vpn
+	`
 
-	listLong    = ``
-	listExample = ``
+	listLong    = `List all VPNs`
+	listExample = `
+	# Full example
+	vultr-cli vpn list
+	`
 
-	getLong    = ``
-	getExample = ``
+	getLong    = `Display the details of a specific VPN`
+	getExample = `
+	# Full example
+	vultr-cli vpn get 4e837ebe-6dbc-4126-bd47-0abb0872c718
+	`
 
-	createLong    = ``
-	createExample = ``
+	createLong    = `Create a new VPN`
+	createExample = `
+	A VPC with NAT gateway enabled is required and must be specified in the --vpc-id flag
 
-	updateLong    = ``
-	updateExample = ``
+	# Full example
+	vultr-cli vpn create --label my-vpn --protocol ipsec --subnet 10.20.0.0/16 --vpc-id 127b4723-072a-4ff8-a031-41f0a9a16475
+	`
 
-	deleteLong    = ``
-	deleteExample = ``
+	updateLong    = `Update an existing VPN`
+	updateExample = `
+	# Full example
+	vultr-cli vpn update 39592568-8823-4825-835f-647a6b003bb8 --label my-vpn-updated 
+	`
 
-	endpointLong    = ``
-	endpointExample = ``
+	deleteLong    = `Delete a VPN`
+	deleteExample = `
+	# Full example
+	vultr-cli vpn delete 39592568-8823-4825-835f-647a6b003bb8
+	`
 
-	listEndpointsLong    = ``
-	listEndpointsExample = ``
+	endpointLong    = `Access commands related to VPN endpoints`
+	endpointExample = `
+	# Full example
+	vultr-cli vpn endpoint fce07639-35ec-4bcd-8a2f-05cac47894c6
+	`
 
-	getEndpointLong    = ``
-	getEndpointExample = ``
+	listEndpointsLong    = `List the endpoints on a VPN`
+	listEndpointsExample = `
+	# Full example
+	vultr-cli vpn endpoint list fce07639-35ec-4bcd-8a2f-05cac47894c6
+	`
 
-	createEndpointLong    = ``
-	createEndpointExample = ``
+	getEndpointLong    = `Display details of a specific VPN endpoint`
+	getEndpointExample = `
+	# Full example
+	vultr-cli vpn endpoint get fce07639-35ec-4bcd-8a2f-05cac47894c6 d745235c-d3e1-4ac9-9570-5b22e759f6f1
+	`
 
-	updateEndpointLong    = ``
-	updateEndpointExample = ``
+	createEndpointLong    = `Create a new endpoint on a VPN`
+	createEndpointExample = `
+	# Full example
+	vultr-cli vpn endpoint create 39592568-8823-4825-835f-647a6b003bb8 --label my-vpv-endpont \
+	--ip-address 10.20.1.1 --pre-shared-key aaabbbcccddd111222333444zzzzvvvv \
+	--remote-subnet 10.21.1.0/24 --remote-subnet 10.21.2.0/24	
+	`
 
-	deleteEndpointLong    = ``
-	deleteEndpointExample = ``
+	updateEndpointLong    = `Update an existing endpoint on a VPN`
+	updateEndpointExample = `
+	NOTE: all --remote-subnet flags must be included in the update, even when they already exist on the endpoint
 
-	configEndpointLong    = ``
-	configEndpointExample = ``
+	# Full example
+	vultr-cli vpn endpoint update 39592568-8823-4825-835f-647a6b003bb8 9fbffbb2-0709-4d24-ab90-8a5f479d31d6 \
+	--ip-address 10.20.2.2 --label my-vpn-endpoint-upated --pre-shared-key ababbbcccddd111222333444zzzzwwxz \
+	--remote-subnet 10.22.1.0/24 --remote-subnet 10.22.2.0/24 --remote-subnet 10.22.3.0/24 
+	`
+
+	deleteEndpointLong    = `Delete a VPN endpoint`
+	deleteEndpointExample = `
+	vultr-cli vpn endpoint delete 39592568-8823-4825-835f-647a6b003bb8 9fbffbb2-0709-4d24-ab90-8a5f479d31d6
+	`
+
+	configEndpointLong    = `Retrieve the configuration file for a VPN endpoint`
+	configEndpointExample = `
+	vultr-cli vpn endpoint config 39592568-8823-4825-835f-647a6b003bb8 efc811e7-d07d-45b1-b50e-19a0c2936ce0
+	`
 )
 
 // NewCmdVPN provides the CLI command for VPN functions
