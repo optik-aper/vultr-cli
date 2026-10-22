@@ -16,7 +16,7 @@ const (
 	PerPageDefault int    = 100
 	FloatPrecision int    = 2
 	FloatBitDepth  int    = 32
-	CIDRRegex      string = `^([0-2]{0,1}[0-9]{0,2})\.([0-2]{0,1}[0-9]{0,2})\.([0-2]{0,1}[0-9]{0,2})\.([0-2]{0,1}[0-9]{0,2})\/[0-3]{0,1}[0-9]$)`
+	CIDRRegex      string = `^[0-2]{0,1}[0-9]{0,2}\.[0-2]{0,1}[0-9]{0,2}\.[0-2]{0,1}[0-9]{0,2}\.[0-2]{0,1}[0-9]{0,2}\/[0-3]{0,1}[0-9]$` //nolint:lll
 )
 
 // SetOptions initializes values used in all CLI commands

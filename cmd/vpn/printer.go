@@ -90,12 +90,12 @@ func (v *VPNPrinter) Columns() [][]string {
 // Data ...
 func (v *VPNPrinter) Data() [][]string {
 	data := [][]string{
-		[]string{"ID", v.VPN.ID},
-		[]string{"VPC ID", v.VPN.VPCID},
-		[]string{"NAT GATEWAY ID", v.VPN.NATGatewayID},
-		[]string{"LABEL", v.VPN.Label},
-		[]string{"STATUS", v.VPN.Status},
-		[]string{"PROTOCOL", v.VPN.Protocol},
+		{"ID", v.VPN.ID},
+		{"VPC ID", v.VPN.VPCID},
+		{"NAT GATEWAY ID", v.VPN.NATGatewayID},
+		{"LABEL", v.VPN.Label},
+		{"STATUS", v.VPN.Status},
+		{"PROTOCOL", v.VPN.Protocol},
 	}
 
 	if len(v.VPN.Subnet) > 0 {
@@ -205,9 +205,9 @@ func (v *VPNEndpointPrinter) Columns() [][]string {
 // Data ...
 func (v *VPNEndpointPrinter) Data() [][]string {
 	data := [][]string{
-		[]string{"ID", v.Endpoint.ID},
-		[]string{"LABEL", v.Endpoint.Label},
-		[]string{"IP ADDRESS", v.Endpoint.Config.IPAddress},
+		{"ID", v.Endpoint.ID},
+		{"LABEL", v.Endpoint.Label},
+		{"IP ADDRESS", v.Endpoint.Config.IPAddress},
 	}
 
 	psk, err := base64.StdEncoding.DecodeString(v.Endpoint.Config.PreSharedKey)

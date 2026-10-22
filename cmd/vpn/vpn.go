@@ -38,7 +38,8 @@ var (
 	A VPC with NAT gateway enabled is required and must be specified in the --vpc-id flag
 
 	# Full example
-	vultr-cli vpn create --label my-vpn --protocol ipsec --subnet 10.20.0.0/16 --vpc-id 127b4723-072a-4ff8-a031-41f0a9a16475
+	vultr-cli vpn create --label my-vpn --protocol ipsec --subnet 10.20.0.0/16 \
+	--vpc-id 127b4723-072a-4ff8-a031-41f0a9a16475
 	`
 
 	updateLong    = `Update an existing VPN`
@@ -491,8 +492,12 @@ func NewCmdVPN(base *cli.Base) *cobra.Command { //nolint:gocyclo,funlen
 		"(optional, required if protocol is 'ipsec') The IPv4 address of the endpoint",
 	)
 
-	createEndpoint.Flags().String("pre-shared-key", "", "(optional) The 32byte key with which to create the endpoint")
-	createEndpoint.Flags().String("pre-shared-key-b64", "", "(optional) The 32byte base64 encoded key with which to create the endpoint")
+	createEndpoint.Flags().String("pre-shared-key", "",
+		"(optional) The 32byte key with which to create the endpoint",
+	)
+	createEndpoint.Flags().String("pre-shared-key-b64", "",
+		"(optional) The 32byte base64 encoded key with which to create the endpoint",
+	)
 	createEndpoint.MarkFlagsMutuallyExclusive("pre-shared-key", "pre-shared-key-b64")
 
 	createEndpoint.Flags().StringArray("remote-subnet", nil,
@@ -591,7 +596,9 @@ One subnet per flag using CIDR formatting (eg.  172.16.0.0/16).`,
 	)
 
 	updateEndpoint.Flags().String("pre-shared-key", "", "(optional) The 32byte key with which to create the endpoint")
-	updateEndpoint.Flags().String("pre-shared-key-b64", "", "(optional) The 32byte base64 encoded key with which to create the endpoint")
+	updateEndpoint.Flags().String("pre-shared-key-b64", "",
+		"(optional) The 32byte base64 encoded key with which to create the endpoint",
+	)
 	updateEndpoint.MarkFlagsMutuallyExclusive("pre-shared-key", "pre-shared-key-b64")
 
 	updateEndpoint.Flags().StringArray("remote-subnet", nil,
