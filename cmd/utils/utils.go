@@ -16,7 +16,7 @@ const (
 	PerPageDefault int    = 100
 	FloatPrecision int    = 2
 	FloatBitDepth  int    = 32
-	CIDRRegex      string = `^[0-2]{0,1}[0-9]{0,2}\.[0-2]{0,1}[0-9]{0,2}\.[0-2]{0,1}[0-9]{0,2}\.[0-2]{0,1}[0-9]{0,2}\/[0-3]{0,1}[0-9]$` //nolint:lll
+	CIDRRegex      string = `^([0-2]{0,1}[0-9]{0,2})\.([0-2]{0,1}[0-9]{0,2})\.([0-2]{0,1}[0-9]{0,2})\.([0-2]{0,1}[0-9]{0,2})\/[0-3]{0,1}[0-9]$` //nolint:lll
 )
 
 // SetOptions initializes values used in all CLI commands
@@ -49,7 +49,7 @@ func IsCIDRFormatted(addr string) (bool, error) {
 }
 
 func SplitCIDRFormat(cidr string) (address *string, mask *int, err error) {
-	if ok, err := IsCIDRFormatted(cidr); ok {
+	if ok, err := IsCIDRFormatted(cidr); !ok {
 		return nil, nil, fmt.Errorf("%q is not an understandable cidr format : %v", cidr, err)
 	}
 
