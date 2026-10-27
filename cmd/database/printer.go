@@ -47,6 +47,12 @@ func (d *DBsPrinter) Data() [][]string { //nolint:funlen,gocyclo
 			[]string{"PLAN DISK", strconv.Itoa(d.DBs[i].PlanDisk)},
 			[]string{"PLAN RAM", strconv.Itoa(d.DBs[i].PlanRAM)},
 			[]string{"PLAN VCPUS", strconv.Itoa(d.DBs[i].PlanVCPUs)},
+			[]string{"PLAN PRICE", strconv.FormatFloat(
+				float64(d.DBs[i].PlanPrice),
+				'f',
+				utils.FloatPrecision,
+				utils.FloatBitDepth,
+			)},
 		)
 
 		if d.DBs[i].DatabaseEngine == "kafka" {
@@ -349,6 +355,12 @@ func (d *DBPrinter) Data() [][]string { //nolint:funlen,gocyclo
 		[]string{"PLAN DISK", strconv.Itoa(d.DB.PlanDisk)},
 		[]string{"PLAN RAM", strconv.Itoa(d.DB.PlanRAM)},
 		[]string{"PLAN VCPUS", strconv.Itoa(d.DB.PlanVCPUs)},
+		[]string{"PLAN PRICE", strconv.FormatFloat(
+			float64(d.DB.PlanPrice),
+			'f',
+			utils.FloatPrecision,
+			utils.FloatBitDepth,
+		)},
 	)
 
 	if d.DB.DatabaseEngine == "kafka" {
@@ -728,7 +740,13 @@ func (p *PlansPrinter) Data() [][]string {
 		}
 
 		data = append(data,
-			[]string{"MONTHLY COST", strconv.Itoa(p.Plans[i].MonthlyCost)},
+			[]string{"MONTHLY COST", strconv.FormatFloat(
+				float64(p.Plans[i].MonthlyCost),
+				'f',
+				utils.FloatPrecision,
+				utils.FloatBitDepth,
+			)},
+
 			[]string{" "},
 			[]string{"SUPPORTED ENGINES"},
 			[]string{"MYSQL", strconv.FormatBool(*p.Plans[i].SupportedEngines.MySQL)},
