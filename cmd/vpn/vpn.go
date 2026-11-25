@@ -257,10 +257,8 @@ func NewCmdVPN(base *cli.Base) *cobra.Command { //nolint:gocyclo,funlen
 	}
 
 	create.Flags().StringP("subnet", "s", "",
-		"(optional) The IPv4 network for the VPN. Must not overlap with other subnets on the VPC",
+		"(optional) CIDR for the subnet (ex. 10.0.2.0/24 or 172.16.0.0/16, etc..)",
 	)
-
-	create.Flags().IntP("size", "z", 0, "(optional) The number of bits for the subnet mask. Min 16; Max 28")
 
 	// Update
 	update := &cobra.Command{
