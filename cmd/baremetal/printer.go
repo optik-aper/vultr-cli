@@ -33,11 +33,11 @@ func (b *BareMetalsPrinter) Columns() [][]string {
 		"LABEL",
 		"OS",
 		"STATUS",
+		"POWER",
 		"REGION",
 		"CPU",
 		"RAM",
 		"DISK",
-		"FEATURES",
 		"TAGS",
 	}}
 }
@@ -49,15 +49,15 @@ func (b *BareMetalsPrinter) Data() [][]string {
 		data = append(data, []string{
 			b.BareMetals[i].ID,
 			b.BareMetals[i].MainIP,
-			strconv.Itoa(b.BareMetals[i].MacAddress),
+			strconv.FormatInt(b.BareMetals[i].MacAddress, 10),
 			b.BareMetals[i].Label,
 			b.BareMetals[i].Os,
 			b.BareMetals[i].Status,
+			b.BareMetals[i].PowerStatus,
 			b.BareMetals[i].Region,
 			strconv.Itoa(b.BareMetals[i].CPUCount),
 			b.BareMetals[i].RAM,
 			b.BareMetals[i].Disk,
-			printer.ArrayOfStringsToString(b.BareMetals[i].Features),
 			printer.ArrayOfStringsToString(b.BareMetals[i].Tags),
 		})
 	}
@@ -107,16 +107,16 @@ func (b *BareMetalPrinter) Data() [][]string {
 	}
 
 	data = append(data,
-		[]string{"MAC ADDRESS", strconv.Itoa(b.BareMetal.MacAddress)},
+		[]string{"MAC ADDRESS", strconv.FormatInt(b.BareMetal.MacAddress, 10)},
 		[]string{"LABEL", b.BareMetal.Label},
 		[]string{"OS", b.BareMetal.Os},
 		[]string{"SNAPSHOT ID", b.BareMetal.SnapshotID},
 		[]string{"STATUS", b.BareMetal.Status},
+		[]string{"POWER", b.BareMetal.PowerStatus},
 		[]string{"REGION", b.BareMetal.Region},
 		[]string{"CPU", strconv.Itoa(b.BareMetal.CPUCount)},
 		[]string{"RAM", b.BareMetal.RAM},
 		[]string{"DISK", b.BareMetal.Disk},
-		[]string{"FEATURES", printer.ArrayOfStringsToString(b.BareMetal.Features)},
 		[]string{"TAGS", printer.ArrayOfStringsToString(b.BareMetal.Tags)},
 	)
 
@@ -206,5 +206,54 @@ func (b *BareMetalBandwidthPrinter) Data() [][]string {
 
 // Paging ...
 func (b *BareMetalBandwidthPrinter) Paging() [][]string {
+	return nil
+}
+
+// ======================================
+
+// VPCsPrinter
+type VPCsPrinter struct {
+	VPCs []govultr.VPCInfo `json:"vpcs"`
+}
+
+// JSON ...
+func (v *VPCsPrinter) JSON() []byte {
+	return printer.MarshalObject(v, "json")
+}
+
+// YAML ...
+func (v *VPCsPrinter) YAML() []byte {
+	return printer.MarshalObject(v, "yaml")
+}
+
+// Columns ...
+func (v *VPCsPrinter) Columns() [][]string {
+	return [][]string{0: {
+		"ID",
+		"MAC ADDRESS",
+		"IP ADDRESS",
+	}}
+}
+
+// Data ...
+func (v *VPCsPrinter) Data() [][]string {
+	if len(v.VPCs) == 0 {
+		return [][]string{0: {"---", "---", "---"}}
+	}
+
+	var data [][]string
+	for i := range v.VPCs {
+		data = append(data, []string{
+			v.VPCs[i].ID,
+			v.VPCs[i].MacAddress,
+			v.VPCs[i].IPAddress,
+		})
+	}
+
+	return data
+}
+
+// Paging ...
+func (v *VPCsPrinter) Paging() [][]string {
 	return nil
 }

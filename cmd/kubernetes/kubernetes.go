@@ -18,11 +18,7 @@ import (
 )
 
 var (
-	long    = `Get all available commands for Kubernetes`
-	example = `
-	# Full example
-	vultr-cli kubernetes
-	`
+	long = `Get all available commands for Kubernetes`
 
 	createLong    = `Create kubernetes cluster on your Vultr account`
 	createExample = `
@@ -230,6 +226,97 @@ var (
 	# Shortened with alias commands
 	vultr-cli k n node r ffd31f18-5f77-454c-9065-212f942c3c35
 	`
+
+	appsAvailableLong = `Retrieves a list of all available kubernetes cluster
+applications. Further information may be retrieved with the 'details' command.`
+	appsAvailableExample = `
+	#Full example
+	vultr-cli kubernetes apps list
+`
+
+	appsDetailsLong    = `Retrieves additional details related to the application.`
+	appsDetailsExample = `
+	#Full example
+	vultr-cli kubernetes apps details c6a00ea5-9a54-481c-a79c-e4a1a74e8f44
+`
+
+	appsDeploymentListLong    = `Retrieves a list of deployments on a kubernetes cluster.`
+	appsDeploymentListExample = `
+	#Full example
+	vultr-cli kubernetes apps deployments list 8cf93f5f-875e-4aea-8a84-ec2dd592b5ae
+`
+
+	appsDeploymentGetLong    = `Retrieves details of a deployment on a kubernetes cluster.`
+	appsDeploymentGetExample = `
+	#Full example
+	vultr-cli kubernetes apps deployments get 8cf93f5f-875e-4aea-8a84-ec2dd592b5ae 4130764b-5276-4552-546f-32513239732b
+`
+
+	appsDeploymentCreateLong    = `Intiate the deployment of the app onto the kubernetes cluster.`
+	appsDeploymentCreateExample = `
+	#Full example
+	vultr-cli kubernetes apps deployments create 8cf93f5f-875e-4aea-8a84-ec2dd592b5ae \
+		--app-id 4130764b-5276-4552-546f-32513239732b
+`
+
+	appsDeploymentUpgradeLong = `Intiate the upgrade process for an app deployment on the kubernetes cluster. 
+This will automatically select the latest version of the app for the upgrade.`
+	appsDeploymentUpgradeExample = `
+	#Full example
+	vultr-cli kubernetes apps deployments upgrade 8cf93f5f-875e-4aea-8a84-ec2dd592b5ae 4130764b-5276-4552-546f-32513239732b
+`
+
+	appsDeploymentDeleteLong    = `Intiate the delete process for an app deployment.`
+	appsDeploymentDeleteExample = `
+	#Full example
+	vultr-cli kubernetes apps deployments delete 8cf93f5f-875e-4aea-8a84-ec2dd592b5ae 4130764b-5276-4552-546f-32513239732b
+`
+
+	npLabelListExample = `
+	# Full example
+	vultr-cli kubernetes node-pool label list 3a350f61-55d9-46a2-ae7b-7d2afc808995 84b1454f-c53a-4f5f-8f4b-fefa1a8f73fa
+`
+
+	npLabelGetExample = `
+	# Full example
+	vultr-cli kubernetes node-pool label get 3a350f61-55d9-46a2-ae7b-7d2afc808995 84b1454f-c53a-4f5f-8f4b-fefa1a8f73fa \
+		162b7e698c7fe33235649d8557c37fcc
+`
+
+	npLabelCreateExample = `
+	# Full example
+	vultr-cli kubernetes node-pool label create 3a350f61-55d9-46a2-ae7b-7d2afc808995 84b1454f-c53a-4f5f-8f4b-fefa1a8f73fa \
+		--key "my-key" --value "my-value"
+`
+
+	npLabelDeleteExample = `
+	# Full example
+	vultr-cli kubernetes node-pool label delete 3a350f61-55d9-46a2-ae7b-7d2afc808995 84b1454f-c53a-4f5f-8f4b-fefa1a8f73fa \
+		162b7e698c7fe33235649d8557c37fcc
+`
+
+	npTaintListExample = `
+	# Full example
+	vultr-cli kubernetes node-pool taint list 3a350f61-55d9-46a2-ae7b-7d2afc808995 84b1454f-c53a-4f5f-8f4b-fefa1a8f73fa
+`
+
+	npTaintGetExample = `
+	# Full example
+	vultr-cli kubernetes node-pool taint get 3a350f61-55d9-46a2-ae7b-7d2afc808995 84b1454f-c53a-4f5f-8f4b-fefa1a8f73fa \
+		162b7e698c7fe33235649d8557c37fcc
+`
+
+	npTaintCreateExample = `
+	# Full example
+	vultr-cli kubernetes node-pool taint create 3a350f61-55d9-46a2-ae7b-7d2afc808995 84b1454f-c53a-4f5f-8f4b-fefa1a8f73fa \
+		--key "my-key" --value "my-value" --effect "NoSchedule"
+`
+
+	npTaintDeleteExample = `
+	# Full example
+	vultr-cli kubernetes node-pool taint delete 3a350f61-55d9-46a2-ae7b-7d2afc808995 84b1454f-c53a-4f5f-8f4b-fefa1a8f73fa \
+		162b7e698c7fe33235649d8557c37fcc
+`
 )
 
 const (
@@ -246,7 +333,6 @@ func NewCmdKubernetes(base *cli.Base) *cobra.Command { //nolint:funlen,gocyclo
 		Aliases: []string{"k"},
 		Short:   "Commands to manage kubernetes clusters",
 		Long:    long,
-		Example: example,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			utils.SetOptions(o.Base, cmd, args)
 			if !o.Base.HasAuth() {
@@ -365,6 +451,11 @@ func NewCmdKubernetes(base *cli.Base) *cobra.Command { //nolint:funlen,gocyclo
 				return fmt.Errorf("error parsing flag 'enable-firewall' for kubernetes cluster create : %v", errFw)
 			}
 
+			vpcID, err := cmd.Flags().GetString("vpc-id")
+			if err != nil {
+				return fmt.Errorf("error parsing flag 'vpc-id' for kubernetes create : %v", err)
+			}
+
 			nps, errFm := formatNodePools(nodepools)
 			if errFm != nil {
 				return fmt.Errorf("error in node pool formating : %v", errFm)
@@ -377,6 +468,7 @@ func NewCmdKubernetes(base *cli.Base) *cobra.Command { //nolint:funlen,gocyclo
 				Version:         version,
 				HAControlPlanes: ha,
 				EnableFirewall:  fw,
+				VPCID:           vpcID,
 			}
 
 			k8, err := o.create()
@@ -423,13 +515,19 @@ highly available, control planes`,
 		`(optional, default false) whether a firewall group should be created for the cluster`,
 	)
 
+	create.Flags().String(
+		"vpc-id",
+		"",
+		`(optional) the VPC ID to use when initializing node private networking. A new VPC is created by default.`,
+	)
+
 	create.Flags().StringArrayP(
 		"node-pools",
 		"n",
 		[]string{},
-		`a comma-separated, key-value pair list of node pools. At least one node pool is required. At least one node is
-required in node pool. Use / between each new node pool.  E.g: 
-'plan:vhf-8c-32gb,label:mynodepool,tag:my-tag,quantity:3/plan:vhf-8c-32gb,label:mynodepool2,quantity:3`,
+		`a comma-separated, key-value pair list of node pools. At least one node pool is required. 
+At least one node is required in node pool. Use / between each new node pool.  
+E.g: 'plan:vhf-8c-32gb,label:mynodepool,tag:my-tag,quantity:3/plan:vhf-8c-32gb,label:mynodepool2,quantity:3`,
 	)
 	if err := create.MarkFlagRequired("node-pools"); err != nil {
 		fmt.Printf("error marking kubernetes create 'ns-primary' flag required: %v", err)
@@ -810,6 +908,11 @@ required in node pool. Use / between each new node pool.  E.g:
 				)
 			}
 
+			vpcOnly, err := cmd.Flags().GetBool("vpc-only")
+			if err != nil {
+				return fmt.Errorf("error parsing flag 'vpc-only' for kubernetes node pool create : %v", err)
+			}
+
 			o.npCreateReq = &govultr.NodePoolReq{
 				NodeQuantity: quantity,
 				Label:        label,
@@ -823,6 +926,10 @@ required in node pool. Use / between each new node pool.  E.g:
 
 			if autoscaler {
 				o.npCreateReq.AutoScaler = govultr.BoolToBoolPtr(true)
+			}
+
+			if vpcOnly {
+				o.npCreateReq.VPCOnly = govultr.BoolToBoolPtr(true)
 			}
 
 			np, err := o.nodePoolCreate()
@@ -869,6 +976,12 @@ required in node pool. Use / between each new node pool.  E.g:
 		"node-labels",
 		nil,
 		"A key=value comma separated string of labels to apply to the nodes in this node pool",
+	)
+
+	npCreate.Flags().Bool("vpc-only", false,
+		`Enable VPC only network access on this node pool. This requires the VPC used by the cluster to 
+have an active NAT gateway and, when enabled, will mean that the nodes will not have a public address 
+or network interface. All traffic from the nodes will be routed, instead, through the NAT gateway.`,
 	)
 
 	// Node Pool Update
@@ -1062,6 +1175,292 @@ required in node pool. Use / between each new node pool.  E.g:
 		nodeRecycle,
 	)
 
+	// Node pool label
+	npLabel := &cobra.Command{
+		Use:     "label",
+		Short:   "Commands to manage node pool labels",
+		Aliases: []string{"labels"},
+	}
+
+	// Node pool label list
+	npLabelList := &cobra.Command{
+		Use:     "list <Cluster ID> <Node Pool ID>",
+		Short:   "List all labels on the node pool",
+		Example: npLabelListExample,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 2 {
+				return errors.New("please provide a cluster ID and a node pool ID")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			labels, err := o.nodePoolLabelList()
+			if err != nil {
+				return fmt.Errorf("error listing kubernetes node pool labels : %v", err)
+			}
+
+			data := &LabelsPrinter{Labels: labels}
+			o.Base.Printer.Display(data, nil)
+
+			return nil
+		},
+	}
+
+	// Node pool label get
+	npLabelGet := &cobra.Command{
+		Use:     "get <Cluster ID> <Node Pool ID> <Label ID>",
+		Short:   "Get a label on the node pool",
+		Example: npLabelGetExample,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 3 {
+				return errors.New("please provide a cluster ID, a node pool ID and a label ID")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			label, err := o.nodePoolLabelGet()
+			if err != nil {
+				return fmt.Errorf("error getting kubernetes node pool label : %v", err)
+			}
+
+			data := &LabelPrinter{Label: label}
+			o.Base.Printer.Display(data, nil)
+
+			return nil
+		},
+	}
+
+	// Node pool label create
+	npLabelCreate := &cobra.Command{
+		Use:     "create <Cluster ID> <Node Pool ID>",
+		Short:   "Create a label in a node pool",
+		Example: npLabelCreateExample,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 2 {
+				return errors.New("please provide a cluster ID and a node pool ID")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			key, err := cmd.Flags().GetString("key")
+			if err != nil {
+				return fmt.Errorf("error parsing flag 'key' for kubernetes node pool label create : %v", err)
+			}
+
+			val, err := cmd.Flags().GetString("value")
+			if err != nil {
+				return fmt.Errorf("error parsing flag 'value' for kubernetes node pool label create : %v", err)
+			}
+
+			o.npLabelReq = &govultr.NodePoolLabelReq{
+				Key:   key,
+				Value: val,
+			}
+
+			label, err := o.nodePoolLabelCreate()
+			if err != nil {
+				return fmt.Errorf("error creating kubernetes node pool label : %v", err)
+			}
+
+			data := &LabelPrinter{Label: label}
+			o.Base.Printer.Display(data, nil)
+
+			return nil
+		},
+	}
+
+	npLabelCreate.Flags().String("key", "", "The key for the label")
+	if err := npLabelCreate.MarkFlagRequired("key"); err != nil {
+		fmt.Printf("error marking kubernetes node pool label create 'key' flag required: %v", err)
+		os.Exit(1)
+	}
+
+	npLabelCreate.Flags().String("value", "", "The value for the label")
+	if err := npLabelCreate.MarkFlagRequired("value"); err != nil {
+		fmt.Printf("error marking kubernetes node pool label create 'value' flag required: %v", err)
+		os.Exit(1)
+	}
+
+	// Node pool label delete
+	npLabelDelete := &cobra.Command{
+		Use:     "delete <Cluster ID> <Node Pool ID> <Label ID>",
+		Short:   "Delete a node pool label",
+		Example: npLabelDeleteExample,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 3 {
+				return errors.New("please provide a cluster ID, a node pool ID and a label ID")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := o.nodePoolLabelDelete(); err != nil {
+				return fmt.Errorf("error deleting kubernetes node pool label : %v", err)
+			}
+
+			o.Base.Printer.Display(printer.Info("Kubernetes node pool label has been deleted"), nil)
+
+			return nil
+		},
+	}
+
+	npLabel.AddCommand(
+		npLabelList,
+		npLabelGet,
+		npLabelCreate,
+		npLabelDelete,
+	)
+
+	// Node pool taint
+	npTaint := &cobra.Command{
+		Use:     "taint",
+		Short:   "Commands to manage node pool taints",
+		Aliases: []string{"taints"},
+	}
+
+	// Node pool taint list
+	npTaintList := &cobra.Command{
+		Use:     "list <Cluster ID> <Node Pool ID>",
+		Short:   "List all taints on the node pool",
+		Example: npTaintListExample,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 2 {
+				return errors.New("please provide a cluster ID and a node pool ID")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			taints, err := o.nodePoolTaintList()
+			if err != nil {
+				return fmt.Errorf("error listing kubernetes node pool taints : %v", err)
+			}
+
+			data := &TaintsPrinter{Taints: taints}
+			o.Base.Printer.Display(data, nil)
+
+			return nil
+		},
+	}
+
+	// Node pool taint get
+	npTaintGet := &cobra.Command{
+		Use:     "get <Cluster ID> <Node Pool ID> <Taint ID>",
+		Short:   "Get a taint on the node pool",
+		Example: npTaintGetExample,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 3 {
+				return errors.New("please provide a cluster ID, a node pool ID and a taint ID")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			taint, err := o.nodePoolTaintGet()
+			if err != nil {
+				return fmt.Errorf("error getting kubernetes node pool taint : %v", err)
+			}
+
+			data := &TaintPrinter{Taint: taint}
+			o.Base.Printer.Display(data, nil)
+
+			return nil
+		},
+	}
+
+	// Node pool taint create
+	npTaintCreate := &cobra.Command{
+		Use:     "create <Cluster ID> <Node Pool ID>",
+		Short:   "Create a taint in a node pool",
+		Example: npTaintCreateExample,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 2 {
+				return errors.New("please provide a cluster ID and a node pool ID")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			key, err := cmd.Flags().GetString("key")
+			if err != nil {
+				return fmt.Errorf("error parsing flag 'key' for kubernetes node pool taint create : %v", err)
+			}
+
+			val, err := cmd.Flags().GetString("value")
+			if err != nil {
+				return fmt.Errorf("error parsing flag 'value' for kubernetes node pool taint create : %v", err)
+			}
+
+			effect, err := cmd.Flags().GetString("effect")
+			if err != nil {
+				return fmt.Errorf("error parsing flag 'effect' for kubernetes node pool taint create : %v", err)
+			}
+
+			o.npTaintReq = &govultr.NodePoolTaintReq{
+				Key:    key,
+				Value:  val,
+				Effect: effect,
+			}
+
+			taint, err := o.nodePoolTaintCreate()
+			if err != nil {
+				return fmt.Errorf("error creating kubernetes node pool taint : %v", err)
+			}
+
+			data := &TaintPrinter{Taint: taint}
+			o.Base.Printer.Display(data, nil)
+
+			return nil
+		},
+	}
+
+	npTaintCreate.Flags().String("key", "", "The key for the taint")
+	if err := npTaintCreate.MarkFlagRequired("key"); err != nil {
+		fmt.Printf("error marking kubernetes node pool taint create 'key' flag required: %v", err)
+		os.Exit(1)
+	}
+
+	npTaintCreate.Flags().String("value", "", "The value for the taint")
+	if err := npTaintCreate.MarkFlagRequired("value"); err != nil {
+		fmt.Printf("error marking kubernetes node pool taint create 'value' flag required: %v", err)
+		os.Exit(1)
+	}
+
+	npTaintCreate.Flags().String(
+		"effect",
+		"",
+		"The effect of the taint. One of 'NoSchedule', 'PreferNoSchedule' and 'NoExecute'",
+	)
+	if err := npTaintCreate.MarkFlagRequired("effect"); err != nil {
+		fmt.Printf("error marking kubernetes node pool taint create 'effect' flag required: %v", err)
+		os.Exit(1)
+	}
+
+	// Node pool taint delete
+	npTaintDelete := &cobra.Command{
+		Use:     "delete <Cluster ID> <Node Pool ID> <Taint ID>",
+		Short:   "Delete a node pool taint",
+		Example: npTaintDeleteExample,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 3 {
+				return errors.New("please provide a cluster ID, a node pool ID and a taint ID")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := o.nodePoolTaintDelete(); err != nil {
+				return fmt.Errorf("error deleting kubernetes node pool taint : %v", err)
+			}
+
+			o.Base.Printer.Display(printer.Info("Kubernetes node pool taint has been deleted"), nil)
+
+			return nil
+		},
+	}
+
+	npTaint.AddCommand(
+		npTaintList,
+		npTaintGet,
+		npTaintCreate,
+		npTaintDelete,
+	)
+
 	nodepool.AddCommand(
 		npList,
 		npGet,
@@ -1069,6 +1468,234 @@ required in node pool. Use / between each new node pool.  E.g:
 		npUpdate,
 		npDelete,
 		node,
+		npLabel,
+		npTaint,
+	)
+
+	// Apps
+	apps := &cobra.Command{
+		Use:     "apps",
+		Short:   "Commands to manage apps in a kubernetes cluster",
+		Aliases: []string{"app"},
+	}
+
+	// Apps list available
+	appsList := &cobra.Command{
+		Use:     "list",
+		Short:   "List catalog of available apps for deployment",
+		Aliases: []string{"available"},
+		Long:    appsAvailableLong,
+		Example: appsAvailableExample,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			apps, err := o.appsListAvailable()
+			if err != nil {
+				return fmt.Errorf("error retrieving available kubernetes applications list : %v", err)
+			}
+
+			data := &AppsPrinter{Apps: apps}
+			o.Base.Printer.Display(data, nil)
+
+			return nil
+		},
+	}
+
+	// Apps show available details
+	appsDetails := &cobra.Command{
+		Use:     "details <APP ID>",
+		Short:   "Show detailed information for an app",
+		Long:    appsDetailsLong,
+		Example: appsDetailsExample,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 1 {
+				return errors.New("please provide an app ID")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			app, err := o.appsGetAvailable()
+			if err != nil {
+				return fmt.Errorf(
+					"error retrieving available kubernetes application details : %v",
+					err,
+				)
+			}
+
+			data := &AppPrinter{App: app}
+			o.Base.Printer.Display(data, nil)
+
+			return nil
+		},
+	}
+
+	appsDeployment := &cobra.Command{
+		Use:     "deployment",
+		Short:   "Commands for managing kubernetes app deployments",
+		Aliases: []string{"deployments"},
+	}
+
+	// Apps deployments list
+	appsDeploymentList := &cobra.Command{
+		Use:     "list <Cluster ID>",
+		Short:   "List all app deployments on the cluster",
+		Long:    appsDeploymentListLong,
+		Example: appsDeploymentListExample,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 1 {
+				return errors.New("please provide a cluster ID")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			deps, err := o.appsListDeployments()
+			if err != nil {
+				return fmt.Errorf("error retrieving list of application deployments on kubernetes cluster : %v", err)
+			}
+
+			data := &AppDeploymentsPrinter{Deployments: deps}
+			o.Base.Printer.Display(data, nil)
+
+			return nil
+		},
+	}
+
+	// Apps get deployment
+	appsDeploymentGet := &cobra.Command{
+		Use:     "get <Cluster ID> <Deployment ID>",
+		Short:   "Get the details of an app deployment on the cluster",
+		Long:    appsDeploymentGetLong,
+		Example: appsDeploymentGetExample,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 2 {
+				return errors.New("please provide a cluster ID and deployment ID")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			dep, err := o.appsGetDeployment()
+			if err != nil {
+				return fmt.Errorf("error retrieving application deployment on kubernetes cluster : %v", err)
+			}
+
+			data := &AppDeploymentPrinter{Deployment: dep}
+			o.Base.Printer.Display(data, nil)
+
+			return nil
+		},
+	}
+
+	// Apps create deployment
+	appsDeploymentCreate := &cobra.Command{
+		Use:     "create <Cluster ID>",
+		Short:   "Create a deployment in the cluster",
+		Long:    appsDeploymentCreateLong,
+		Example: appsDeploymentCreateExample,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 1 {
+				return errors.New("please provide a cluster ID")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			appID, err := cmd.Flags().GetString("app-id")
+			if err != nil {
+				return fmt.Errorf("error parsing flag 'app-id' for kubernetes cluster app deployment create : %v", err)
+			}
+
+			config, err := cmd.Flags().GetString("config")
+			if err != nil {
+				return fmt.Errorf("error parsing flag 'config' for kubernetes cluster app deployment create : %v", err)
+			}
+
+			timeout, err := cmd.Flags().GetString("timeout")
+			if err != nil {
+				return fmt.Errorf("error parsing flag 'timeout' for kubernetes cluster app deployment create : %v", err)
+			}
+
+			o.appDeploymentReq = &govultr.ClusterApplicationDeploymentReq{
+				ID:      appID,
+				Config:  config,
+				Timeout: timeout,
+			}
+
+			dep, err := o.appsCreateDeployment()
+			if err != nil {
+				return fmt.Errorf("error creating application deployment on kubernetes cluster : %v", err)
+			}
+
+			data := &AppDeploymentPrinter{Deployment: dep}
+			o.Base.Printer.Display(data, nil)
+
+			return nil
+		},
+	}
+
+	appsDeploymentCreate.Flags().String("app-id", "", "The app ID to be deployed onto the kubernetes cluster")
+	if err := appsDeploymentCreate.MarkFlagRequired("app-id"); err != nil {
+		fmt.Printf("error marking app-id flag required for kubernetes app deployment create : %v\n", err)
+		os.Exit(1)
+	}
+
+	appsDeploymentCreate.Flags().String("timeout", "", "The timeout to be used when creating the deployment")
+	appsDeploymentCreate.Flags().String("config", "", "Custom Helm values to send with the deployment")
+
+	// Apps upgrade deployment
+	appsDeploymentUpgrade := &cobra.Command{
+		Use:     "upgrade <Cluster ID> <Deployment ID>",
+		Short:   "Upgrade a deployment in the cluster to the latest available version",
+		Long:    appsDeploymentUpgradeLong,
+		Example: appsDeploymentUpgradeExample,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 2 {
+				return errors.New("please provide a cluster ID and a deployment ID")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := o.appsUpgradeDeployment(); err != nil {
+				return fmt.Errorf("error upgrading application deployment on kubernetes cluster : %v", err)
+			}
+
+			o.Base.Printer.Display(printer.Info("Application deployment upgrade is underway"), nil)
+
+			return nil
+		},
+	}
+
+	// Apps delete deployment
+	appsDeploymentDelete := &cobra.Command{
+		Use:     "delete <Cluster ID> <Deployment ID>",
+		Short:   "Delete a deployment in the cluster",
+		Long:    appsDeploymentDeleteLong,
+		Example: appsDeploymentDeleteExample,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 2 {
+				return errors.New("please provide a cluster ID and a deployment ID")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := o.appsDeleteDeployment(); err != nil {
+				return fmt.Errorf("error deleting the application deployment on kubernetes cluster : %v", err)
+			}
+
+			o.Base.Printer.Display(printer.Info("Application deployment deletion is underway"), nil)
+
+			return nil
+		},
+	}
+
+	appsDeployment.AddCommand(
+		appsDeploymentList,
+		appsDeploymentGet,
+		appsDeploymentCreate,
+		appsDeploymentUpgrade,
+		appsDeploymentDelete,
+	)
+
+	apps.AddCommand(
+		appsList,
+		appsDetails,
+		appsDeployment,
 	)
 
 	cmd.AddCommand(
@@ -1081,6 +1708,7 @@ required in node pool. Use / between each new node pool.  E.g:
 		nodepool,
 		versions,
 		upgrades,
+		apps,
 	)
 
 	return cmd
@@ -1158,6 +1786,12 @@ func formatNodeData(node []string) (*govultr.NodePoolReq, error) { //nolint:gocy
 				return nil, fmt.Errorf("invalid value for max-nodes: %v", err)
 			}
 			nodeData.MaxNodes = v
+		case "vpc-only":
+			v, err := strconv.ParseBool(val)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for node pool vpc-only : %v", err)
+			}
+			nodeData.VPCOnly = govultr.BoolToBoolPtr(v)
 		}
 	}
 
@@ -1178,12 +1812,15 @@ func formatNodeLabels(nl string) map[string]string {
 }
 
 type options struct {
-	Base        *cli.Base
-	CreateReq   *govultr.ClusterReq
-	UpdateReq   *govultr.ClusterReqUpdate
-	UpgradeReq  *govultr.ClusterUpgradeReq
-	npCreateReq *govultr.NodePoolReq
-	npUpdateReq *govultr.NodePoolReqUpdate
+	Base             *cli.Base
+	CreateReq        *govultr.ClusterReq
+	UpdateReq        *govultr.ClusterReqUpdate
+	UpgradeReq       *govultr.ClusterUpgradeReq
+	npCreateReq      *govultr.NodePoolReq
+	npUpdateReq      *govultr.NodePoolReqUpdate
+	npLabelReq       *govultr.NodePoolLabelReq
+	npTaintReq       *govultr.NodePoolTaintReq
+	appDeploymentReq *govultr.ClusterApplicationDeploymentReq
 }
 
 func (o *options) list() ([]govultr.Cluster, *govultr.Meta, error) {
@@ -1262,4 +1899,85 @@ func (o *options) nodePoolNodeDelete() error {
 
 func (o *options) nodePoolNodeRecycle() error {
 	return o.Base.Client.Kubernetes.RecycleNodePoolInstance(o.Base.Context, o.Base.Args[0], o.Base.Args[1], o.Base.Args[2]) //nolint:lll
+}
+
+func (o *options) nodePoolLabelList() ([]govultr.NodePoolLabel, error) {
+	labels, _, err := o.Base.Client.Kubernetes.ListNodePoolLabels(o.Base.Context, o.Base.Args[0], o.Base.Args[1])
+	return labels, err
+}
+
+func (o *options) nodePoolLabelGet() (*govultr.NodePoolLabel, error) {
+	label, _, err := o.Base.Client.Kubernetes.GetNodePoolLabel(o.Base.Context, o.Base.Args[0], o.Base.Args[1], o.Base.Args[2]) //nolint:lll
+	return label, err
+}
+
+func (o *options) nodePoolLabelCreate() (*govultr.NodePoolLabel, error) {
+	label, _, err := o.Base.Client.Kubernetes.CreateNodePoolLabel(o.Base.Context, o.Base.Args[0], o.Base.Args[1], o.npLabelReq) //nolint:lll
+	return label, err
+}
+
+func (o *options) nodePoolLabelDelete() error {
+	return o.Base.Client.Kubernetes.DeleteNodePoolLabel(o.Base.Context, o.Base.Args[0], o.Base.Args[1], o.Base.Args[2]) //nolint:lll
+}
+
+func (o *options) nodePoolTaintList() ([]govultr.NodePoolTaint, error) {
+	taints, _, err := o.Base.Client.Kubernetes.ListNodePoolTaints(o.Base.Context, o.Base.Args[0], o.Base.Args[1])
+	return taints, err
+}
+
+func (o *options) nodePoolTaintGet() (*govultr.NodePoolTaint, error) {
+	taint, _, err := o.Base.Client.Kubernetes.GetNodePoolTaint(o.Base.Context, o.Base.Args[0], o.Base.Args[1], o.Base.Args[2]) //nolint:lll
+	return taint, err
+}
+
+func (o *options) nodePoolTaintCreate() (*govultr.NodePoolTaint, error) {
+	taint, _, err := o.Base.Client.Kubernetes.CreateNodePoolTaint(o.Base.Context, o.Base.Args[0], o.Base.Args[1], o.npTaintReq) //nolint:lll
+	return taint, err
+}
+
+func (o *options) nodePoolTaintDelete() error {
+	return o.Base.Client.Kubernetes.DeleteNodePoolTaint(o.Base.Context, o.Base.Args[0], o.Base.Args[1], o.Base.Args[2]) //nolint:lll
+}
+
+func (o *options) appsListAvailable() ([]govultr.ClusterApplication, error) {
+	apps, _, err := o.Base.Client.Kubernetes.ListClusterApplicationsAvailable(o.Base.Context)
+	return apps, err
+}
+
+func (o *options) appsListDeployments() ([]govultr.ClusterApplicationDeployment, error) {
+	deps, _, err := o.Base.Client.Kubernetes.ListClusterApplicationDeployments(o.Base.Context, o.Base.Args[0])
+	return deps, err
+}
+
+func (o *options) appsGetDeployment() (*govultr.ClusterApplicationDeployment, error) {
+	dep, _, err := o.Base.Client.Kubernetes.GetClusterApplicationDeployment(o.Base.Context, o.Base.Args[0], o.Base.Args[1]) //nolint:lll
+	return dep, err
+}
+
+func (o *options) appsCreateDeployment() (*govultr.ClusterApplicationDeployment, error) {
+	dep, _, err := o.Base.Client.Kubernetes.CreateClusterApplicationDeployment(o.Base.Context, o.Base.Args[0], o.appDeploymentReq) //nolint:lll
+	return dep, err
+}
+
+func (o *options) appsUpgradeDeployment() error {
+	return o.Base.Client.Kubernetes.UpgradeClusterApplicationDeployment(o.Base.Context, o.Base.Args[0], o.Base.Args[1])
+}
+
+func (o *options) appsDeleteDeployment() error {
+	return o.Base.Client.Kubernetes.DeleteClusterApplicationDeployment(o.Base.Context, o.Base.Args[0], o.Base.Args[1])
+}
+
+func (o *options) appsGetAvailable() (*govultr.ClusterApplication, error) {
+	apps, _, err := o.Base.Client.Kubernetes.ListClusterApplicationsAvailable(o.Base.Context)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range apps {
+		if apps[i].ID == o.Base.Args[0] {
+			return &apps[i], nil
+		}
+	}
+
+	return nil, fmt.Errorf("app not found")
 }
